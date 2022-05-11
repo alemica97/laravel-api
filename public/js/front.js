@@ -1994,6 +1994,18 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
@@ -2001,16 +2013,27 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
-      posts: []
+      posts: [],
+      lastPage: 0,
+      currentPage: 1
     };
   },
   methods: {
     fetchPostsData: function fetchPostsData() {
       var _this = this;
 
-      axios.get('/api/posts').then(function (res) {
+      var page = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+      //questo parametro corrispondera al numero della pagina nell'URL, es. /api/posts?page=1
+      axios.get('/api/posts', {
+        params: {
+          page: page
+        }
+      }).then(function (res) {
         // console.log(res.data.posts);
-        _this.posts = res.data.posts; // console.log(this.posts);
+        _this.posts = res.data.posts.data;
+        _this.lastPage = res.data.posts.last_page;
+        _this.currentPage = res.data.posts.current_page;
+        console.log(_this.posts);
       })["catch"](function (err) {
         console.warn(err);
       });
@@ -3275,17 +3298,45 @@ var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    {
-      staticClass:
-        "container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 p-6",
-    },
-    _vm._l(_vm.posts, function (post) {
-      return _c("PostCard", { key: post.id, attrs: { post: post } })
-    }),
-    1
-  )
+  return _c("div", [
+    _c(
+      "div",
+      {
+        staticClass:
+          "container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-8 p-6",
+      },
+      _vm._l(_vm.posts, function (post) {
+        return _c("PostCard", { key: post.id, attrs: { post: post } })
+      }),
+      1
+    ),
+    _vm._v(" "),
+    _c("div", { staticClass: "container" }, [
+      _c(
+        "ul",
+        { staticClass: "flex gap-5 justify-center items-center" },
+        _vm._l(_vm.lastPage, function (n) {
+          return _c(
+            "li",
+            {
+              key: n,
+              class: [
+                _vm.currentPage === n ? "bg-amber-600" : "bg-slate-600",
+                "pageLink p-4 rounded-full h-8 w-8 flex items-center justify-center cursor-pointer",
+              ],
+              on: {
+                click: function ($event) {
+                  return _vm.fetchPostsData(n)
+                },
+              },
+            },
+            [_vm._v("\n                " + _vm._s(n) + "\n            ")]
+          )
+        }),
+        0
+      ),
+    ]),
+  ])
 }
 var staticRenderFns = []
 render._withStripped = true
